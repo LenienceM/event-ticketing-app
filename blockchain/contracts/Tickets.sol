@@ -4,15 +4,13 @@ pragma solidity ^0.8.28;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Tickets is ERC1155, Ownable {
-
-    
+contract Tickets is ERC1155, Ownable { 
 
     struct Ticket {
-        uint256 eventId;      // off-chain ID
-        uint256 maxSupply;    // total tickets
-        uint256 minted;       // tickets minted so far
-        uint256 priceWei;     // price per ticket
+        uint256 eventId;      
+        uint256 maxSupply;    
+        uint256 minted;       
+        uint256 priceWei;    
     }
 
     uint256 public nextTicketTypeId;
@@ -22,7 +20,6 @@ contract Tickets is ERC1155, Ownable {
        
     }
 
-    // Create tickets for an off-chain event
     function createTickets(
         uint256 eventId,
         uint256 maxSupply,
@@ -37,7 +34,6 @@ contract Tickets is ERC1155, Ownable {
         });
     }
 
-    // Mint tickets to a buyer
     function mintTicket(uint256 ticketTypeId, uint256 amount) external payable {
         Ticket storage t = ticketsByType[ticketTypeId];
         require(t.eventId != 0, "Invalid ticket type");
@@ -48,7 +44,6 @@ contract Tickets is ERC1155, Ownable {
         _mint(msg.sender, ticketTypeId, amount, "");
     }
 
-    // Withdraw ETH to owner
     function withdraw(address payable to) external onlyOwner {
         to.transfer(address(this).balance);
     }
