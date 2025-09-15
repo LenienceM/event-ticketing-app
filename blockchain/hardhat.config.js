@@ -1,4 +1,28 @@
+/*require("@nomicfoundation/hardhat-toolbox");
+
+module.exports = {
+  solidity: {
+    version: "0.8.28",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+    },
+
+ networks: {
+    hardhat: {},
+    optimism_sepolia: {
+      url: "https://sepolia.optimism.io",  // RPC for Optimism Sepolia
+      accounts: [process.env.PRIVATE_KEY]  // your MetaMask private key
+    }
+  }
+  },
+};
+*/
+
 require("@nomicfoundation/hardhat-toolbox");
+require("dotenv").config();
 
 module.exports = {
   solidity: {
@@ -10,4 +34,11 @@ module.exports = {
       },
     },
   },
+  networks: {
+    hardhat: {},
+    optimism_sepolia: {
+      url: "https://sepolia.optimism.io",  // RPC for Optimism Sepolia
+      accounts: [process.env.PRIVATE_KEY]  // your MetaMask private key
+    }
+  }
 };
