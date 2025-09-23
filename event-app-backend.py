@@ -1,3 +1,6 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
+from web3 import Web3 
 import os
 from dotenv import load_dotenv
 import psycopg2
@@ -9,10 +12,10 @@ load_dotenv()
 DB_NAME = os.getenv("DB_NAME")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST", "localhost")  # default if not set
-DB_PORT = os.getenv("DB_PORT", "5432")
+DB_HOST = os.getenv("DB_HOST") 
+DB_PORT = os.getenv("DB_PORT")
 
-# Use in your connection
+
 conn = psycopg2.connect(
     dbname=DB_NAME,
     user=DB_USER,
@@ -22,7 +25,6 @@ conn = psycopg2.connect(
 )
 cur = conn.cursor()
 
-# Create event
 def create_event(name, venue, capacity,date, description):
     cur.execute(
         """
@@ -35,11 +37,27 @@ def create_event(name, venue, capacity,date, description):
     conn.commit()
     print(f"Event created with ID: {event_id}")
 
-# Example usage
-#create_event("Blockchain Summit", "Cape Town Convention Center", "100","2025-09-10 10:00:00", "Web3 & Layer 2 ticketing showcase")
+# Initialize FastAPI
+app = FastAPI()
 
+# Request body schema
+class TicketPurchase(BaseModel):
+    txHash: str
+    eventId: int
 
+@app.post("/api/tickets/purchase")
+def purchase_ticket(purchase: TicketPurchase):
+    # Connect to Ethereum node (Optimism Sepolia testnet)
+    w3 = Web3(Web3.HTTPProvider("https://sepolia.optimism.io"))
 
+    # Fetch transaction receipt
+    receipt = w3.eth.get_transaction_receipt(purchase.txHash)
 
+    # Insert into Postgres
+    cur.execute(
+        "INSERT INTO tickets (event_id, tx_hash, buyer) VALUES (%s, %s, %s)",
+        (purchase.eventId, purchase.txHash, receipt["from"])
+    )
+    conn.commit()
 
-
+    return {"status": "ok", "buyer": receipt["from"]}
